@@ -1,46 +1,37 @@
 {
   "boards": [
     {
-      "id": "680d",
-      "title": "test",
-      "bgColor": "#ccc",
-      "visibility": "private"
+      "id": "c586",
+      "title": "тест2",
+      "bgColor": "#0ea5e9",
+      "visibility": "public"
     }
   ],
   "columns": [
     {
-      "id": "1510",
+      "id": "ecca",
       "title": "Todo",
-      "boardId": "680d"
+      "boardId": "c586",
+      "order": 1
     },
     {
-      "id": "2d2d",
+      "id": "f8be",
       "title": "Doing",
-      "boardId": "680d"
+      "boardId": "c586",
+      "order": 2
     },
     {
-      "id": "cad9",
+      "id": "f061",
       "title": "Done",
-      "boardId": "680d"
+      "boardId": "c586",
+      "order": 3
     }
   ],
   "tasks": [
     {
-      "id": "754c",
-      "columnId": "2d2d",
-      "title": "test 1",
-      "order": 0
-    },
-    {
-      "id": "08f5",
-      "title": "тест1",
-      "columnId": "1510",
-      "order": 0
-    },
-    {
-      "id": "4f1e",
-      "title": "тест 2",
-      "columnId": "1510",
+      "id": "7852",
+      "title": "таск 2",
+      "columnId": "ecca",
       "order": 1
     }
   ],

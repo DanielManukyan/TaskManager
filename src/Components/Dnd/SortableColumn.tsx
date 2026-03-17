@@ -22,7 +22,6 @@ export default function SortableColumn({ columnId }: { columnId: string }) {
           {...attributes}
           {...listeners}
         >
-          Drag
         </button>
       </div>
       <Column columnId={columnId} />
