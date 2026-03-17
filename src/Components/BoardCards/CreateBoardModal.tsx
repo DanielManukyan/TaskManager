@@ -14,7 +14,7 @@ const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault()
   if (!title.trim()) return
 
-  dispatch(createBoardWithColumns(title, '#ccc', 'private'))
+  dispatch(createBoardWithColumns({ title, bgColor: '#ccc', visibility: 'private' }))
   setTitle('')
   onClose()
 }

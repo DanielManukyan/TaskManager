@@ -1,9 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getBoards, createBoard as createBoardApi } from '../db/dbTable'
+import { createBoard as createBoardApi, getBoards } from '../db/dbTable'
+import { addColumn } from '../column/columnSlice'
 
 export interface Board {
-  id: number
+  id: string
   title: string
+  bgColor: string
+  visibility: 'private' | 'workspace' | 'public'
 }
 
 interface BoardState {
@@ -28,12 +31,29 @@ export const setBoards = createAsyncThunk(
 export const addBoard = createAsyncThunk(
   'boards/add',
   async (board: Omit<Board, 'id'>) => {
-    const newBoard = { ...board, id: Date.now() }
-    await createBoardApi(newBoard)
-    return newBoard
+    return await createBoardApi(board)
   }
 )
 
+export const createBoardWithColumns = createAsyncThunk(
+  'boards/createWithColumns',
+  async (
+    {
+      title,
+      bgColor,
+      visibility,
+    }: { title: string; bgColor: string; visibility: Board['visibility'] },
+    { dispatch }
+  ) => {
+    const board = await createBoardApi({ title, bgColor, visibility })
+
+    await dispatch(addColumn({ title: 'Todo', boardId: board.id }))
+    await dispatch(addColumn({ title: 'Doing', boardId: board.id }))
+    await dispatch(addColumn({ title: 'Done', boardId: board.id }))
+
+    return board
+  }
+)
 
 
 const boardSlice = createSlice({
@@ -46,6 +66,10 @@ const boardSlice = createSlice({
     })
 
     builder.addCase(addBoard.fulfilled, (state, action) => {
+      state.boards.push(action.payload)
+    })
+
+    builder.addCase(createBoardWithColumns.fulfilled, (state, action) => {
       state.boards.push(action.payload)
     })
   },

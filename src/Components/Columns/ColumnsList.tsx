@@ -18,7 +18,7 @@ function ColumnsList({ boardId }: ColumnListProps) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    dispatch(addColumn(title, boardId));
+    dispatch(addColumn({ title: title.trim(), boardId }));
     setTitle("");
     setIsAdding(false);
   };

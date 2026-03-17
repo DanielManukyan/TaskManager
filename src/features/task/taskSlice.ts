@@ -1,10 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getTasks, createTask as createTaskApi } from '../db/dbTable'
+import {
+  createTask as createTaskApi,
+  deleteTask as deleteTaskApi,
+  getTasks,
+  updateTask as updateTaskApi,
+} from '../db/dbTable'
+import type { RootState } from '../../app/store'
 
 export interface Task {
-  id: number
+  id: string
   title: string
-  columnId: number
+  columnId: string
 }
 
 interface TaskState {
@@ -24,11 +30,21 @@ export const fetchTasks = createAsyncThunk('tasks/fetch', async () => {
 export const addTask = createAsyncThunk(
   'tasks/add',
   async (task: Omit<Task, 'id'>) => {
-    const newTask = { ...task, id: Date.now() }
-    await createTaskApi(newTask)
-    return newTask
+    return await createTaskApi(task)
   }
 )
+
+export const updateTask = createAsyncThunk(
+  'tasks/update',
+  async ({ id, patch }: { id: string; patch: Partial<Omit<Task, 'id'>> }) => {
+    return await updateTaskApi(id, patch)
+  }
+)
+
+export const deleteTask = createAsyncThunk('tasks/delete', async (id: string) => {
+  await deleteTaskApi(id)
+  return id
+})
 
 const taskSlice = createSlice({
   name: 'tasks',
@@ -42,7 +58,18 @@ const taskSlice = createSlice({
     builder.addCase(addTask.fulfilled, (state, action) => {
       state.tasks.push(action.payload)
     })
+
+    builder.addCase(updateTask.fulfilled, (state, action) => {
+      const idx = state.tasks.findIndex(t => t.id === action.payload.id)
+      if (idx !== -1) state.tasks[idx] = action.payload
+    })
+
+    builder.addCase(deleteTask.fulfilled, (state, action) => {
+      state.tasks = state.tasks.filter(t => t.id !== action.payload)
+    })
   },
 })
+
+export const selectTasks = (state: RootState) => state.task.tasks
 
 export default taskSlice.reducer

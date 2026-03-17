@@ -19,7 +19,7 @@ function UserWorkspaces() {
 
       <div className="flex gap-6 mt-4 flex-wrap">
         {boards.map(board => (
-          <div key={board.BoardId} className="w-60 h-32 rounded-lg">
+          <div key={board.id} className="w-60 h-32 rounded-lg">
             <BoardCard board={board} />
           </div>
         ))}

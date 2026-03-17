@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useAppSelector, useAppDispatch } from "../../hooks/redux";
-import { selectColumnById, insertTaskIntoColumn } from "../../features/column/columnSlice";
+import { selectColumnById } from "../../features/column/columnSlice";
 import { addTask } from "../../features/task/taskSlice";
 import TaskList from "../Tasks/TasksList";
 
@@ -21,9 +21,7 @@ function Column({ columnId }: ColumnProps) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const action = addTask(columnId, title);
-    dispatch(action);
-    dispatch(insertTaskIntoColumn({ columnId, taskId: action.payload.id }));
+    dispatch(addTask({ columnId, title: title.trim() }));
 
     setTitle("");
     setIsAdding(false);

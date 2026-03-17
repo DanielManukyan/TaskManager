@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getColumns, createColumn as createColumnApi } from '../db/dbTable'
+import { createColumn as createColumnApi, deleteColumn as deleteColumnApi, getColumns, updateColumn as updateColumnApi } from '../db/dbTable'
+import type { RootState } from '../../app/store'
 
 export interface Column {
-  id: number
+  id: string
   title: string
-  boardId: number
+  boardId: string
 }
 
 interface ColumnState {
@@ -22,11 +23,21 @@ export const fetchColumns = createAsyncThunk('columns/fetch', async () => {
 export const addColumn = createAsyncThunk(
   'columns/add',
   async (column: Omit<Column, 'id'>) => {
-    const newColumn = { ...column, id: Date.now() }
-    await createColumnApi(newColumn)
-    return newColumn
+    return await createColumnApi(column)
   }
 )
+
+export const updateColumn = createAsyncThunk(
+  'columns/update',
+  async ({ id, patch }: { id: string; patch: Partial<Omit<Column, 'id'>> }) => {
+    return await updateColumnApi(id, patch)
+  }
+)
+
+export const deleteColumn = createAsyncThunk('columns/delete', async (id: string) => {
+  await deleteColumnApi(id)
+  return id
+})
 
 const columnSlice = createSlice({
   name: 'columns',
@@ -40,18 +51,21 @@ const columnSlice = createSlice({
     builder.addCase(addColumn.fulfilled, (state, action) => {
       state.columns.push(action.payload)
     })
+
+    builder.addCase(updateColumn.fulfilled, (state, action) => {
+      const idx = state.columns.findIndex(c => c.id === action.payload.id)
+      if (idx !== -1) state.columns[idx] = action.payload
+    })
+
+    builder.addCase(deleteColumn.fulfilled, (state, action) => {
+      state.columns = state.columns.filter(c => c.id !== action.payload)
+    })
   },
 })
 
-const selectColumns = (state: { columns: ColumnState }) => state.columns.columns
+export const selectColumns = (state: RootState) => state.column.columns
 
-export const selectColumnById = (state: { columns: ColumnState }, id: number) =>
+export const selectColumnById = (state: RootState, id: string) =>
   selectColumns(state).find(col => col.id === id)
 
-export const insertTaskIntoColumn = createAsyncThunk(
-  'columns/insertTask',
-  async ({ columnId, taskId }: { columnId: number; taskId: number }) => {
-    return { columnId, taskId }
-  }
-)
 export default columnSlice.reducer

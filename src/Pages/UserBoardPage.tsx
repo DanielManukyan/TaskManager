@@ -1,67 +1,30 @@
-import { useEffect, useState } from "react";
-import { addBoard, fetchBoards, type Board } from "../features/board/boardSlice";
-import { fetchColumns } from "../features/column/columnSlice";
-import { fetchTasks } from "../features/task/taskSlice";
-import { useAppDispatch } from "../hooks/redux";
-
+import { useMemo } from "react";
+import { useParams } from "react-router-dom";
+import ColumnsList from "../Components/Columns/ColumnsList";
+import { useAppSelector } from "../hooks/redux";
 
 export default function UserBoardPage() {
-  const [board, setBoard] = useState('');
-  const [column, setColumn] = useState('');
-  const [task, setTask] = useState('');
+  const params = useParams();
+  const boardId = params.id ?? "";
 
-  const dispatch = useAppDispatch();
+  const board = useAppSelector((s) => s.board.boards).find((b) => b.id === boardId);
 
-  useEffect(() => {
-    dispatch(fetchBoards())
-    dispatch(fetchColumns())
-    dispatch(fetchTasks())
-  }, [])
+  const title = useMemo(() => board?.title ?? "Board", [board?.title]);
+
+  if (!boardId) {
+    return <div className="p-6">Wrong board id</div>;
+  }
 
   return (
-    <div>
-      <h1>Boards</h1>
+    <div className="p-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">{title}</h1>
+        <div className="text-sm text-gray-500">{board?.visibility ?? ""}</div>
+      </div>
 
-      <input
-        value={board}
-        onChange={(e) => setBoard(e.target.value)}
-        placeholder="board"
-      />
-      <button onClick={addBoard}>add</button>
-
-      {boards.map((b) => (
-        <div key={b.id}>
-          <h2>{b.title}</h2>
-
-          <input
-            value={column}
-            onChange={(e) => setColumn(e.target.value)}
-            placeholder="column"
-          />
-          <button onClick={() => addColumn(b.id)}>add column</button>
-
-          {columns
-            .filter((c) => c.boardId === b.id)
-            .map((c) => (
-              <div key={c.id} style={{ marginLeft: 20 }}>
-                <h3>{c.title}</h3>
-
-                <input
-                  value={task}
-                  onChange={(e) => setTask(e.target.value)}
-                  placeholder="task"
-                />
-                <button onClick={() => addTask(c.id)}>add task</button>
-
-                {tasks
-                  .filter((t) => t.columnId === c.id)
-                  .map((t) => (
-                    <p key={t.id}>- {t.title}</p>
-                  ))}
-              </div>
-            ))}
-        </div>
-      ))}
+      <div className="mt-6 overflow-x-auto">
+        <ColumnsList boardId={boardId} />
+      </div>
     </div>
   );
 }

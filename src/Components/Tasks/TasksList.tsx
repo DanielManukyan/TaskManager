@@ -15,7 +15,7 @@ export default function TasksList({ columnId }: Props) {
   );
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       {columnTasks.map(task => (
         <TaskField
           key={task.id}
@@ -24,6 +24,6 @@ export default function TasksList({ columnId }: Props) {
           title={task.title}
         />
       ))}
-    </>
+    </div>
   );
 }

@@ -9,7 +9,7 @@ type Props = {
 const BoardCard: React.FC<Props> = ({ board }) => {
     const navigate = useNavigate()
     const openBoard = () => {
-        navigate(`/board/${board.BoardId}`,  { state: { board } })
+        navigate(`/board/${board.id}`,  { state: { board } })
       };
 
   return (
