@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { selectColumnById, insertTaskIntoColumn } from "../../features/column/columnSlice";
 import { addTask } from "../../features/task/taskSlice";
@@ -12,7 +12,12 @@ interface ColumnProps {
 function Column({ columnId }: ColumnProps) {
   const dispatch = useAppDispatch();
   const column = useAppSelector(state => selectColumnById(state, columnId));
-  const { setNodeRef } = useDroppable({ id: columnId });
+  const { setNodeRef } = useDroppable({
+    id: columnId,
+    data: {
+      columnId
+    }
+});
 
   const [isAdding, setIsAdding] = useState(false);
   const [title, setTitle] = useState("");

@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { selectColumns, addColumn } from "../../features/column/columnSlice";
 import Column from "./Column";
@@ -8,7 +8,7 @@ interface ColumnListProps {
   boardId: string;
 }
 
-function ColumnList({ boardId }: ColumnListProps) {
+function ColumnsList({ boardId }: ColumnListProps) {
   const dispatch = useAppDispatch();
   const columns = useAppSelector(selectColumns).filter(c => c.boardId === boardId);
 
@@ -69,4 +69,4 @@ function ColumnList({ boardId }: ColumnListProps) {
   );
 }
 
-export default ColumnList;
+export default ColumnsList;

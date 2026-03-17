@@ -10,14 +10,14 @@ function CreateBoardModal({ onClose }: CreateBoardModalProps) {
   const [title, setTitle] = useState('')
   const dispatch = useAppDispatch()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!title.trim()) return
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!title.trim()) return
 
-    dispatch(createBoardWithColumns({ title, bgColor: '#10b981', visibility: 'public' }))
-    setTitle('')
-    onClose()
-  }
+  dispatch(createBoardWithColumns(title, '#ccc', 'private'))
+  setTitle('')
+  onClose()
+}
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">

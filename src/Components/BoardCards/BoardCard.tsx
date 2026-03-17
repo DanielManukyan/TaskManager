@@ -1,12 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router";
-
-type Board = {
-  BoardId: string;
-  title: string;
-  bgColor: string;
-  visibility: "public" | "private" | "shared";
-};
+import { type Board } from "../../features/board/boardSlice";
 
 type Props = {
   board: Board;

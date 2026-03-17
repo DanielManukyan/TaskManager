@@ -12,13 +12,13 @@ interface TaskMovePayload {
   fromColumnId: string;
   toColumnId: string;
   taskId: string;
-  afterTaskId?: string;
+  afterTaskId?: string | null;
 }
 
 interface TaskReorderPayload {
   columnId: string;
   taskId: string;
-  afterTaskId?: string;
+  afterTaskId?: string | null;
 }
 
 const columnsAdapter = createEntityAdapter<Column>();

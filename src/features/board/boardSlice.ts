@@ -6,8 +6,7 @@ import type { AppDispatch } from '../../app/store'
 export type BoardVisibility = 'public' | 'private' | 'shared'
 
 export interface Board {
-  BoardId: Key | null | undefined
-  id: string
+  BoardId: string
   title: string
   bgColor: string
   visibility: BoardVisibility
@@ -36,7 +35,7 @@ export const boardSlice = createSlice({
       state.boards.push(action.payload)
     },
     removeBoard(state, action: PayloadAction<string>) {
-      state.boards = state.boards.filter(b => b.id !== action.payload)
+      state.boards = state.boards.filter(b => b.BoardId !== action.payload)
     },
     selectBoard(state, action: PayloadAction<string | null>) {
       state.selectedBoardId = action.payload
@@ -44,24 +43,24 @@ export const boardSlice = createSlice({
   },
 })
 
-export const createBoardWithColumns = (title: string, bgColor: string = '#ffffff', visibility: BoardVisibility = 'public') => {
+export const createBoardWithColumns = (title: string, bgColor: string = "#ffffff", visibility: BoardVisibility = "public") => {
   return (dispatch: AppDispatch) => {
+
     const boardId = nanoid()
+
     const newBoard: Board = {
-      id: boardId,
+      BoardId: boardId,
       title,
       bgColor,
       visibility,
       columnIds: [],
-      BoardId: undefined,
       columns: []
     }
 
-
     dispatch(addBoard(newBoard))
 
+    const defaultColumns = ["To Do", "Done"]
 
-    const defaultColumns = ['To Do', 'Done']
     defaultColumns.forEach(colTitle => {
       dispatch(addColumn(colTitle, boardId))
     })

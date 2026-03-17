@@ -1,7 +1,7 @@
 // import type { FC } from "react"
 import Header from '../Components/Main/Header/Header';
 import SideMenu from '../Components/Main/SideMenu/SideMenu';
-import RecentlyViewed from '../Components/Main/BoardList/RecentlyViewed';
+// import RecentlyViewed from '../Components/Main/BoardList/RecentlyViewed';
 import UserWorkspaces from '../Components/Main/BoardList/UserWorkspaces';
 
 function MainPage() {
@@ -11,7 +11,7 @@ function MainPage() {
             <div className="flex">
                 <SideMenu />
                 <div className="flex-col w-full">
-                    <RecentlyViewed />
+                    {/* <RecentlyViewed /> */}
                     <UserWorkspaces />    
                 </div>
             </div>

@@ -1,23 +1,5 @@
 {
-  "boards": [
-    {
-      "id": "6176",
-      "BoardId": "WO1I5zgt0bcca_i4lD1Kd",
-      "title": "Daniel",
-      "bgColor": "#10b981",
-      "visibility": "public",
-      "columns": []
-    },
-    {
-      "id": "f0dd",
-      "BoardId": "yt7HdY3obXE7PVeUtefPI",
-      "title": "test",
-      "bgColor": "#6366f1",
-      "visibility": "public",
-      "columns": []
-    }
-  ],
+  "boards": [],
   "columns": [],
-  "tasks": [],
-  "$schema": "./node_modules/json-server/schema.json"
+  "tasks": []
 }
