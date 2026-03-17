@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { createBoard as createBoardApi, getBoards } from '../db/dbTable'
-import { addColumn } from '../column/columnSlice'
+import { createBoard as createBoardApi, deleteBoard as deleteBoardApi, getBoards } from '../db/dbTable'
+import { addColumn, deleteColumn } from '../column/columnSlice'
+import { deleteTask } from '../task/taskSlice'
+import type { RootState } from '../../app/store'
 
 export interface Board {
   id: string
@@ -55,6 +57,28 @@ export const createBoardWithColumns = createAsyncThunk(
   }
 )
 
+export const deleteBoard = createAsyncThunk(
+  'boards/delete',
+  async (boardId: string, { dispatch, getState }) => {
+    const state = getState() as RootState
+
+    const columns = state.column.columns.filter(c => c.boardId === boardId)
+    const columnIds = new Set(columns.map(c => c.id))
+    const tasks = state.task.tasks.filter(t => columnIds.has(t.columnId))
+
+    for (const t of tasks) {
+      await dispatch(deleteTask(t.id))
+    }
+
+    for (const c of columns) {
+      await dispatch(deleteColumn(c.id))
+    }
+
+    await deleteBoardApi(boardId)
+    return boardId
+  }
+)
+
 
 const boardSlice = createSlice({
   name: 'boards',
@@ -71,6 +95,10 @@ const boardSlice = createSlice({
 
     builder.addCase(createBoardWithColumns.fulfilled, (state, action) => {
       state.boards.push(action.payload)
+    })
+
+    builder.addCase(deleteBoard.fulfilled, (state, action) => {
+      state.boards = state.boards.filter(b => b.id !== action.payload)
     })
   },
 })
