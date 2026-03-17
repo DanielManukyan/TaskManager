@@ -6,6 +6,7 @@ export interface Column {
   id: string
   title: string
   boardId: string
+  order: number
 }
 
 interface ColumnState {
@@ -22,8 +23,16 @@ export const fetchColumns = createAsyncThunk('columns/fetch', async () => {
 
 export const addColumn = createAsyncThunk(
   'columns/add',
-  async (column: Omit<Column, 'id'>) => {
-    return await createColumnApi(column)
+  async (
+    { title, boardId }: { title: string; boardId: string },
+    { getState }
+  ) => {
+    const state = getState() as RootState
+    const maxOrder = state.column.columns
+      .filter(c => c.boardId === boardId)
+      .reduce((max, c) => Math.max(max, c.order ?? 0), 0)
+
+    return await createColumnApi({ title, boardId, order: maxOrder + 1 })
   }
 )
 

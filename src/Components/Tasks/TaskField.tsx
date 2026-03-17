@@ -60,7 +60,7 @@ export default function TaskField({ taskId, columnId, title }: Props) {
         </div>
       ) : (
         <div className="flex items-center justify-between gap-2">
-          <div className="text-sm break-words">{title}</div>
+          <div className="text-sm wrap-break-word">{title}</div>
           <div className="flex gap-2 shrink-0">
             <button
               type="button"

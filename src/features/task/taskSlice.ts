@@ -11,6 +11,7 @@ export interface Task {
   id: string
   title: string
   columnId: string
+  order: number
 }
 
 interface TaskState {
@@ -29,8 +30,16 @@ export const fetchTasks = createAsyncThunk('tasks/fetch', async () => {
 // 🔽 создание
 export const addTask = createAsyncThunk(
   'tasks/add',
-  async (task: Omit<Task, 'id'>) => {
-    return await createTaskApi(task)
+  async (
+    { title, columnId }: { title: string; columnId: string },
+    { getState }
+  ) => {
+    const state = getState() as RootState
+    const maxOrder = state.task.tasks
+      .filter(t => t.columnId === columnId)
+      .reduce((max, t) => Math.max(max, t.order ?? 0), 0)
+
+    return await createTaskApi({ title, columnId, order: maxOrder + 1 })
   }
 )
 
