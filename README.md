@@ -1,75 +1,130 @@
-# React + TypeScript + Vite
+Как всё работает
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+1) Что вообще за проект
 
-Currently, two official plugins are available:
+Это Trello‑подобное приложение:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Board (доска) — например “Work”.
+Column (колонка) — “Todo / Doing / Done”.
+Task (карточка/задача) — текст внутри колонки.
+Все данные лежат в db.json и отдаются через json-server.
 
-## React Compiler
+2) Сервер: json-server
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Как запускать
+npm run server → поднимает API на http://localhost:3001
+Он читает и сам изменяет db.json.
+Какие “таблицы”
+Файл db.json примерно такой:
 
-## Expanding the ESLint configuration
+boards: []
+columns: []
+tasks: []
+Какие запросы делает фронт
+В src/features/db/dbTable.ts:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+GET
+/boards, /columns, /tasks — загрузка данных
+POST
+/boards, /columns, /tasks — создание
+PATCH
+/boards/:id, /columns/:id, /tasks/:id — изменение (частичное)
+DELETE
+/boards/:id, /columns/:id, /tasks/:id — удаление
+Важно: json-server у тебя генерирует id как строку (типа "680d"), поэтому в коде id — string.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+3) Фронт: React + Redux Toolkit
+Store (общая память приложения)
+В src/app/store.ts подключены 3 слайса:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+board
+column
+task
+Что такое slice
+Slice — это:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+state (данные в памяти)
+actions/reducers (как менять данные)
+thunks (асинхронные действия: запросы на сервер)
+4) Загрузка данных при старте
+В src/App.tsx при открытии приложения делается:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+dispatch(fetchBoards())
+dispatch(fetchColumns())
+dispatch(fetchTasks())
+Это тянет данные с json-server и кладёт в Redux.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+5) Создание / изменение / удаление (и почему сохраняется)
+Создание
+Например задача:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-# TaskManager
-# TaskManager
+UI вызывает dispatch(addTask({ title, columnId }))
+thunk делает POST /tasks
+сервер возвращает задачу с id
+slice добавляет её в state.task.tasks
+UI сразу показывает новую карточку
+Изменение
+Например переименовать карточку или поменять order/columnId:
+
+dispatch(updateTask({ id, patch }))
+thunk делает PATCH /tasks/:id
+сервер возвращает обновлённый объект
+slice заменяет задачу в state
+Удаление
+dispatch(deleteTask(id))
+thunk делает DELETE /tasks/:id
+slice удаляет задачу из state
+Поэтому после обновления страницы данные не пропадают: они реально лежат в db.json.
+
+6) Порядок (как Trello)
+Чтобы знать порядок, мы храним число:
+
+Column.order
+Task.order
+UI сортирует:
+
+колонки: по order
+задачи внутри колонки: по order
+Когда ты перетаскиваешь, мы пересчитываем order и делаем PATCH, чтобы порядок сохранился.
+
+7) DnD (перетаскивание) — как это работает
+Главные части из @dnd-kit
+DndContext (в ColumnsList)
+
+слушает drag‑события
+самое важное событие: onDragEnd
+useSortable (в SortableColumn и SortableTask)
+
+делает элемент перетаскиваемым
+даёт setNodeRef (к чему “прицепить” drag)
+даёт listeners/attributes (какие события слушать)
+даёт transform/transition (как красиво двигать)
+SortableContext
+
+говорит: “вот список элементов, их порядок можно менять”
+для задач — внутри каждой колонки свой список
+для колонок — список колонок
+Что происходит при отпускании мыши (onDragEnd)
+Есть два случая:
+
+Тащили колонку
+мы меняем порядок массива колонок (на фронте)
+пересчитываем order
+делаем PATCH /columns/:id для каждой колонки, где order изменился
+Тащили задачу
+если перенесли в другую колонку:
+меняем columnId у задачи
+в любом случае:
+пересчитываем order задач в колонках
+делаем PATCH /tasks/:id (order/columnId)
+8) Почему раньше страница “перезагружалась” от перетаскивания
+json-server менял db.json, Vite в dev‑режиме видел изменения файла и делал reload.
+
+Я добавил в vite.config.ts игнор db.json, поэтому теперь страница не перезагружается, но сохранение остаётся.
+
+9) Как тебе это запускать “по шагам”
+Терминал 1:
+npm run server
+Терминал 2:
+npm run dev
+Открой приложение, создай доску, добавь задачи, потаскай — и обнови страницу: всё должно остаться.
