@@ -1,74 +1,48 @@
-import { createEntityAdapter, createSlice, type PayloadAction, nanoid } from "@reduxjs/toolkit";
-import type { RootState } from "../../app/store";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { getTasks, createTask as createTaskApi } from '../db/dbTable'
 
 export interface Task {
-  id: string;
-  columnId: string;
-  title: string;
-  description?: string;
+  id: number
+  title: string
+  columnId: number
 }
 
-const tasksAdapter = createEntityAdapter<Task>({
-  sortComparer: false
-});
+interface TaskState {
+  tasks: Task[]
+}
 
-const initialState = tasksAdapter.getInitialState();
+const initialState: TaskState = {
+  tasks: [],
+}
+
+// 🔽 загрузка
+export const fetchTasks = createAsyncThunk('tasks/fetch', async () => {
+  return await getTasks()
+})
+
+// 🔽 создание
+export const addTask = createAsyncThunk(
+  'tasks/add',
+  async (task: Omit<Task, 'id'>) => {
+    const newTask = { ...task, id: Date.now() }
+    await createTaskApi(newTask)
+    return newTask
+  }
+)
 
 const taskSlice = createSlice({
-  name: "task",
+  name: 'tasks',
   initialState,
-  reducers: {
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchTasks.fulfilled, (state, action) => {
+      state.tasks = action.payload
+    })
 
-    setTasks: tasksAdapter.setAll,
+    builder.addCase(addTask.fulfilled, (state, action) => {
+      state.tasks.push(action.payload)
+    })
+  },
+})
 
-    addTask: {
-      reducer(state, action: PayloadAction<Task>) {
-        tasksAdapter.addOne(state, action.payload);
-      },
-      prepare(columnId: string, title: string) {
-        return {
-          payload: {
-            id: nanoid(),
-            columnId,
-            title
-          } as Task
-        };
-      }
-    },
-
-    removeTask(state, action: PayloadAction<string>) {
-      tasksAdapter.removeOne(state, action.payload);
-    },
-
-    moveTask(
-      state,
-      action: PayloadAction<{
-        taskId: string;
-        toColumnId: string;
-      }>
-    ) {
-      const { taskId, toColumnId } = action.payload;
-      const task = state.entities[taskId];
-      if (task) {
-        task.columnId = toColumnId;
-      }
-    }
-
-  }
-});
-
-export const {
-  setTasks,
-  addTask,
-  removeTask,
-  moveTask
-} = taskSlice.actions;
-
-export default taskSlice.reducer;
-
-export const taskSelectors = tasksAdapter.getSelectors<RootState>(
-  state => state.task
-);
-
-export const selectTasks = (state: RootState) =>
-  taskSelectors.selectAll(state);
+export default taskSlice.reducer

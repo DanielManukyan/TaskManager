@@ -1,71 +1,54 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { nanoid } from '@reduxjs/toolkit'
-import { addColumn, type Column } from '../column/columnSlice'
-import type { AppDispatch } from '../../app/store'
-
-export type BoardVisibility = 'public' | 'private' | 'shared'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { getBoards, createBoard as createBoardApi } from '../db/dbTable'
 
 export interface Board {
-  BoardId: string
+  id: number
   title: string
-  bgColor: string
-  visibility: BoardVisibility
-  columnIds: string[]
-  columns: Column[]
 }
 
 interface BoardState {
   boards: Board[]
-  selectedBoardId: string | null
 }
 
 const initialState: BoardState = {
   boards: [],
-  selectedBoardId: null,
 }
 
-export const boardSlice = createSlice({
-  name: 'board',
+export const fetchBoards = createAsyncThunk('boards/fetch', async () => {
+  return await getBoards()
+})
+
+export const setBoards = createAsyncThunk(
+  'boards/set',
+  async (boards: Board[]) => {
+    return boards
+  }
+)
+
+export const addBoard = createAsyncThunk(
+  'boards/add',
+  async (board: Omit<Board, 'id'>) => {
+    const newBoard = { ...board, id: Date.now() }
+    await createBoardApi(newBoard)
+    return newBoard
+  }
+)
+
+
+
+const boardSlice = createSlice({
+  name: 'boards',
   initialState,
-  reducers: {
-    setBoards(state, action: PayloadAction<Board[]>) {
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchBoards.fulfilled, (state, action) => {
       state.boards = action.payload
-    },
-    addBoard(state, action: PayloadAction<Board>) {
+    })
+
+    builder.addCase(addBoard.fulfilled, (state, action) => {
       state.boards.push(action.payload)
-    },
-    removeBoard(state, action: PayloadAction<string>) {
-      state.boards = state.boards.filter(b => b.BoardId !== action.payload)
-    },
-    selectBoard(state, action: PayloadAction<string | null>) {
-      state.selectedBoardId = action.payload
-    },
+    })
   },
 })
 
-export const createBoardWithColumns = (title: string, bgColor: string = "#ffffff", visibility: BoardVisibility = "public") => {
-  return (dispatch: AppDispatch) => {
-
-    const boardId = nanoid()
-
-    const newBoard: Board = {
-      BoardId: boardId,
-      title,
-      bgColor,
-      visibility,
-      columnIds: [],
-      columns: []
-    }
-
-    dispatch(addBoard(newBoard))
-
-    const defaultColumns = ["To Do", "Done"]
-
-    defaultColumns.forEach(colTitle => {
-      dispatch(addColumn(colTitle, boardId))
-    })
-  }
-}
-
-export const { setBoards, addBoard, removeBoard, selectBoard } = boardSlice.actions
 export default boardSlice.reducer

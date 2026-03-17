@@ -2,7 +2,6 @@ import { useState, type FormEvent } from "react";
 import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { selectColumns, addColumn } from "../../features/column/columnSlice";
 import Column from "./Column";
-import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 
 interface ColumnListProps {
   boardId: string;
@@ -26,11 +25,9 @@ function ColumnsList({ boardId }: ColumnListProps) {
 
   return (
     <div className="flex items-start gap-4">
-      <SortableContext items={columns.map(c => c.id)} strategy={horizontalListSortingStrategy}>
         {columns.map(column => (
           <Column key={column.id} columnId={column.id} />
         ))}
-      </SortableContext>
 
       <div className="bg-gray-300/90 px-2 w-64 rounded">
         {isAdding ? (

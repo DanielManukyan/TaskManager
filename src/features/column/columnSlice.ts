@@ -1,83 +1,57 @@
-import { createEntityAdapter, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "../../app/store";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { getColumns, createColumn as createColumnApi } from '../db/dbTable'
 
 export interface Column {
-  id: string;
-  boardId: string;
-  title: string;
-  taskIds: string[];
+  id: number
+  title: string
+  boardId: number
 }
 
-interface TaskMovePayload {
-  fromColumnId: string;
-  toColumnId: string;
-  taskId: string;
-  afterTaskId?: string | null;
+interface ColumnState {
+  columns: Column[]
 }
 
-interface TaskReorderPayload {
-  columnId: string;
-  taskId: string;
-  afterTaskId?: string | null;
+const initialState: ColumnState = {
+  columns: [],
 }
 
-const columnsAdapter = createEntityAdapter<Column>();
+export const fetchColumns = createAsyncThunk('columns/fetch', async () => {
+  return await getColumns()
+})
+
+export const addColumn = createAsyncThunk(
+  'columns/add',
+  async (column: Omit<Column, 'id'>) => {
+    const newColumn = { ...column, id: Date.now() }
+    await createColumnApi(newColumn)
+    return newColumn
+  }
+)
 
 const columnSlice = createSlice({
-  name: "column",
-  initialState: columnsAdapter.getInitialState(),
-  reducers: {
-    addColumn: {
-      reducer(state, action: PayloadAction<Column>) {
-        columnsAdapter.addOne(state, action.payload);
-      },
-      prepare(title: string, boardId: string) {
-        return { payload: { id: crypto.randomUUID(), title, boardId, taskIds: [] } };
-      },
-    },
-    insertTaskIntoColumn(state, action: PayloadAction<{ columnId: string; taskId: string }>) {
-      const col = state.entities[action.payload.columnId];
-      if (!col) return;
-      col.taskIds.push(action.payload.taskId);
-    },
-    reorderTasks(state, action: PayloadAction<TaskReorderPayload>) {
-      const { columnId, taskId, afterTaskId } = action.payload;
-      const column = state.entities[columnId];
-      if (!column) return;
+  name: 'columns',
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchColumns.fulfilled, (state, action) => {
+      state.columns = action.payload
+    })
 
-      const oldIndex = column.taskIds.indexOf(taskId);
-      if (oldIndex === -1) return;
-
-      column.taskIds.splice(oldIndex, 1);
-      if (afterTaskId) {
-        const newIndex = column.taskIds.indexOf(afterTaskId) + 1;
-        column.taskIds.splice(newIndex, 0, taskId);
-      } else {
-        column.taskIds.unshift(taskId);
-      }
-    },
-    moveTask(state, action: PayloadAction<TaskMovePayload>) {
-      const { fromColumnId, toColumnId, taskId, afterTaskId } = action.payload;
-      const fromCol = state.entities[fromColumnId];
-      const toCol = state.entities[toColumnId];
-      if (!fromCol || !toCol) return;
-
-      const index = fromCol.taskIds.indexOf(taskId);
-      if (index !== -1) fromCol.taskIds.splice(index, 1);
-
-      if (afterTaskId) {
-        const newIndex = toCol.taskIds.indexOf(afterTaskId) + 1;
-        toCol.taskIds.splice(newIndex, 0, taskId);
-      } else {
-        toCol.taskIds.push(taskId);
-      }
-    },
+    builder.addCase(addColumn.fulfilled, (state, action) => {
+      state.columns.push(action.payload)
+    })
   },
-});
+})
 
-export const { addColumn, insertTaskIntoColumn, reorderTasks, moveTask } = columnSlice.actions;
-export default columnSlice.reducer;
+const selectColumns = (state: { columns: ColumnState }) => state.columns.columns
 
-export const columnSelectors = columnsAdapter.getSelectors<RootState>(state => state.column);
-export const selectColumns = (state: RootState) => columnSelectors.selectAll(state) ?? [];
-export const selectColumnById = (state: RootState, id: string) => columnSelectors.selectById(state, id);
+export const selectColumnById = (state: { columns: ColumnState }, id: number) =>
+  selectColumns(state).find(col => col.id === id)
+
+export const insertTaskIntoColumn = createAsyncThunk(
+  'columns/insertTask',
+  async ({ columnId, taskId }: { columnId: number; taskId: number }) => {
+    return { columnId, taskId }
+  }
+)
+export default columnSlice.reducer

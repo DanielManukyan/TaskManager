@@ -3,7 +3,6 @@ import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { selectColumnById, insertTaskIntoColumn } from "../../features/column/columnSlice";
 import { addTask } from "../../features/task/taskSlice";
 import TaskList from "../Tasks/TasksList";
-import { useDroppable } from "@dnd-kit/core";
 
 interface ColumnProps {
   columnId: string;
@@ -12,12 +11,6 @@ interface ColumnProps {
 function Column({ columnId }: ColumnProps) {
   const dispatch = useAppDispatch();
   const column = useAppSelector(state => selectColumnById(state, columnId));
-  const { setNodeRef } = useDroppable({
-    id: columnId,
-    data: {
-      columnId
-    }
-});
 
   const [isAdding, setIsAdding] = useState(false);
   const [title, setTitle] = useState("");
@@ -37,7 +30,7 @@ function Column({ columnId }: ColumnProps) {
   };
 
   return (
-    <div ref={setNodeRef} className="flex w-64 bg-gray-200 rounded-xl flex-col p-3 gap-3">
+    <div className="flex w-64 bg-gray-200 rounded-xl flex-col p-3 gap-3">
       <div className="font-bold text-lg">{column.title}</div>
       <TaskList columnId={columnId} />
       {isAdding ? (

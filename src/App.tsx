@@ -14,20 +14,18 @@ function App() {
 
   useEffect(() => {
     const loadData = async () => {
-      // Загружаем данные с "БД"
+
       const [boards, columns, tasks] = await Promise.all([
         getBoards(),
         getColumns(),
         getTasks()
       ])
 
-      // Загружаем доски
+
       dispatch(setBoards(boards))
 
-      // Загружаем задачи в store
       dispatch(setTasks(tasks))
 
-      // Загружаем колонки и вставляем задачи в них
       columns.forEach(col => {
         dispatch(addColumn(col.title, col.boardId))
         if (col.taskIds?.length) {
