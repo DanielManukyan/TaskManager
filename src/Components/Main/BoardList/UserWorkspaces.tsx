@@ -3,13 +3,21 @@ import BoardCard from '../../BoardCards/BoardCard'
 import CreateBoardModal from '../../BoardCards/CreateBoardModal'
 import CreateNewBoardCard from '../../BoardCards/CreatNewBoardCard'
 import { useAppSelector } from '../../../hooks/redux'
+import "../../../index.css"
 
 function UserWorkspaces() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const boards = useAppSelector(s => s.board.boards)
 
-  const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
+  const openModal = () => {
+    setIsModalOpen(true)
+    document.body.classList.add('modal-open')
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    document.body.classList.remove('modal-open')
+  }
 
   return (
     <div className="w-full p-6">

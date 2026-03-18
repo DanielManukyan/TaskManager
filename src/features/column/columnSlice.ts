@@ -29,8 +29,8 @@ export const addColumn = createAsyncThunk(
   ) => {
     const state = getState() as RootState
     const maxOrder = state.column.columns
-      .filter(c => c.boardId === boardId)
-      .reduce((max, c) => Math.max(max, c.order ?? 0), 0)
+      .filter(col => col.boardId === boardId)
+      .reduce((max, col) => Math.max(max, col.order ?? 0), 0)
 
     return await createColumnApi({ title, boardId, order: maxOrder + 1 })
   }

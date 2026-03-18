@@ -1,38 +1,44 @@
 {
   "boards": [
     {
-      "id": "c586",
-      "title": "тест2",
-      "bgColor": "#0ea5e9",
+      "id": "6c8e",
+      "title": "gdg",
+      "bgColor": "#3b82f6",
       "visibility": "public"
     }
   ],
   "columns": [
     {
-      "id": "ecca",
+      "id": "ebb8",
       "title": "Todo",
-      "boardId": "c586",
+      "boardId": "6c8e",
       "order": 1
     },
     {
-      "id": "f8be",
+      "id": "63fa",
       "title": "Doing",
-      "boardId": "c586",
+      "boardId": "6c8e",
       "order": 2
     },
     {
-      "id": "f061",
+      "id": "baa6",
       "title": "Done",
-      "boardId": "c586",
+      "boardId": "6c8e",
       "order": 3
     }
   ],
   "tasks": [
     {
-      "id": "7852",
-      "title": "таск 2",
-      "columnId": "ecca",
-      "order": 1
+      "id": "ff2c",
+      "title": "12",
+      "columnId": "baa6",
+      "order": 0
+    },
+    {
+      "id": "dfd5",
+      "title": "2",
+      "columnId": "ebb8",
+      "order": 0
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

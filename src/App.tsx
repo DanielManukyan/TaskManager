@@ -1,6 +1,6 @@
 import './App.css'
 import { Routes, Route } from 'react-router-dom'
-import MainPage from './Pages/MainPage'
+import MainPage from './Pages/Boards'
 import UserBoardPage from './Pages/UserBoardPage'
 import { useEffect } from 'react'
 import { useAppDispatch } from './hooks/redux'
