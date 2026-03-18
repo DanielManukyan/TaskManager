@@ -62,12 +62,12 @@ const columnSlice = createSlice({
     })
 
     builder.addCase(updateColumn.fulfilled, (state, action) => {
-      const idx = state.columns.findIndex(c => c.id === action.payload.id)
+      const idx = state.columns.findIndex(col => col.id === action.payload.id)
       if (idx !== -1) state.columns[idx] = action.payload
     })
 
     builder.addCase(deleteColumn.fulfilled, (state, action) => {
-      state.columns = state.columns.filter(c => c.id !== action.payload)
+      state.columns = state.columns.filter(col => col.id !== action.payload)
     })
   },
 })
